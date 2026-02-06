@@ -1,5 +1,7 @@
 package todo
 
+import "fmt"
+
 // Add возвращает обновлённый срез с новой задачей
 func Add(tasks []Task, desc string) []Task {
 	var maxID int
@@ -41,4 +43,15 @@ func List(tasks []Task, filter string) []Task {
 	default:
 		return []Task{}
 	}
+}
+
+// Complete отмечает задачу выполненной по её ID
+func Complete(tasks []Task, id int) ([]Task, error) {
+	for i, task := range tasks {
+		if task.ID == id {
+			tasks[i].Done = true
+			return tasks, nil
+		}
+	}
+	return tasks, fmt.Errorf("задача с ID %d не найдена", id)
 }
