@@ -7,6 +7,7 @@ import (
 	"todo-app/internal/todo"
 )
 
+// LoadJSON возвращает срез задач из json файла
 func LoadJSON(path string) ([]todo.Task, error) {
 	_, err := os.Stat(path)
 	if err != nil {
@@ -31,6 +32,7 @@ func LoadJSON(path string) ([]todo.Task, error) {
 	return tasks, nil
 }
 
+//SaveJSON создает новый файл json 
 func SaveJSON(path string, tasks []todo.Task) error {
 	data, err := json.MarshalIndent(tasks, "", "  ")
 	if err != nil {
