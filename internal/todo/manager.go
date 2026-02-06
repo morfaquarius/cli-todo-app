@@ -55,3 +55,14 @@ func Complete(tasks []Task, id int) ([]Task, error) {
 	}
 	return tasks, fmt.Errorf("задача с ID %d не найдена", id)
 }
+
+// Delete удаляет задачу по её ID
+func Delete(tasks []Task, id int) ([]Task, error) {
+	for i, task := range tasks {
+		if task.ID == id {
+			tasks = append(tasks[:i], tasks[i+1:]...)
+			return tasks, nil
+		}
+	}
+	return tasks, fmt.Errorf("задача с ID %d не найдена", id)
+}
