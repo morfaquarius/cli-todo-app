@@ -9,11 +9,15 @@ import (
 
 func LoadJSON(path string) ([]todo.Task, error) {
 	_, err := os.Stat(path)
-	if os.IsNotExist(err) {
-		SaveJSON(path, []todo.Task{})
-		return []todo.Task{}, nil
-	} else if err != nil && !os.IsNotExist(err) {
-		return nil, fmt.Errorf("ошибка: %w", err)
+	if err != nil {
+		if os.IsNotExist(err) {
+			err := SaveJSON(path, []todo.Task{})
+			if err != nil {
+				return nil, fmt.Errorf("ошибка при создании файла: %w", err)
+			}
+			return []todo.Task{}, nil
+		}
+		return nil, fmt.Errorf("ошибка доступа к файлу: %w", err)
 	}
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -34,7 +38,7 @@ func SaveJSON(path string, tasks []todo.Task) error {
 	}
 	err = os.WriteFile(path, data, 0644)
 	if err != nil {
-		return fmt.Errorf("ошибка записи в файла: %w", err)
+		return fmt.Errorf("ошибка записи файла: %w", err)
 	}
 	return nil
 }
