@@ -17,14 +17,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	help := `Доступные команды:
-  add
-  list
-  complete
-  delete
-  export
-  load`
-
 	command := os.Args[1]
 
 	flags := os.Args[2:]
@@ -56,16 +48,12 @@ func main() {
 			addCmd.Usage()
 			os.Exit(1)
 		}
-		tasks, err := storage.LoadJSON(taskFile)
-		if err != nil {
-			fmt.Println("Ошибка:", err)
-			os.Exit(1)
-		}
+		tasks := loadTasksOrExit(taskFile)
+
 		tasks = todo.Add(tasks, *desc)
-		if err := storage.SaveJSON(taskFile, tasks); err != nil {
-			fmt.Println("Ошибка:", err)
-			os.Exit(1)
-		}
+
+		saveTasksOrExit(taskFile, tasks)
+
 		fmt.Println("Задача успешно добавлена!")
 	case "list":
 		listCmd.Parse(flags)
@@ -82,11 +70,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		tasks, err := storage.LoadJSON(taskFile)
-		if err != nil {
-			fmt.Println("Ошибка:", err)
-			os.Exit(1)
-		}
+		tasks := loadTasksOrExit(taskFile)
 
 		if len(tasks) == 0 {
 			fmt.Println("Нет задач")
@@ -117,21 +101,16 @@ func main() {
 			completeCmd.Usage()
 			os.Exit(1)
 		}
-		tasks, err := storage.LoadJSON(taskFile)
+
+		tasks := loadTasksOrExit(taskFile)
+
+		tasks, err := todo.Complete(tasks, *idComplete)
 		if err != nil {
 			fmt.Println("Ошибка:", err)
 			os.Exit(1)
 		}
-		tasks, err = todo.Complete(tasks, *idComplete)
-		if err != nil {
-			fmt.Println("Ошибка:", err)
-			os.Exit(1)
-		}
-		err = storage.SaveJSON(taskFile, tasks)
-		if err != nil {
-			fmt.Println("Ошибка:", err)
-			os.Exit(1)
-		}
+		saveTasksOrExit(taskFile, tasks)
+
 		fmt.Printf("Задача с ID - %d помечена выполненной!\n", *idComplete)
 	case "delete":
 		deleteCmd.Parse(flags)
@@ -140,21 +119,15 @@ func main() {
 			deleteCmd.Usage()
 			os.Exit(1)
 		}
-		tasks, err := storage.LoadJSON(taskFile)
+		tasks := loadTasksOrExit(taskFile)
+
+		tasks, err := todo.Delete(tasks, *idDelete)
 		if err != nil {
 			fmt.Println("Ошибка:", err)
 			os.Exit(1)
 		}
-		tasks, err = todo.Delete(tasks, *idDelete)
-		if err != nil {
-			fmt.Println("Ошибка:", err)
-			os.Exit(1)
-		}
-		err = storage.SaveJSON(taskFile, tasks)
-		if err != nil {
-			fmt.Println("Ошибка:", err)
-			os.Exit(1)
-		}
+		saveTasksOrExit(taskFile, tasks)
+
 		fmt.Printf("Задача с ID - %d успешно удалена!\n", *idDelete)
 	case "export":
 		exportCmd.Parse(flags)
@@ -184,11 +157,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		tasks, err := storage.LoadJSON(taskFile)
-		if err != nil {
-			fmt.Println("Ошибка:", err)
-			os.Exit(1)
-		}
+		tasks := loadTasksOrExit(taskFile)
 
 		if *format == "json" {
 			err := storage.SaveJSON(*outFile, tasks)
@@ -209,6 +178,7 @@ func main() {
 		loadCmd.Parse(flags)
 		if *loadFile == "" {
 			fmt.Println("Ошибка: файл для импорта задач не указан")
+			loadCmd.Usage()
 			os.Exit(1)
 		}
 
@@ -221,29 +191,48 @@ func main() {
 				fmt.Println("Ошибка:", err)
 				os.Exit(1)
 			}
-			err = storage.SaveJSON("tasks.json", tasks)
-			if err != nil {
-				fmt.Println("Ошибка:", err)
-				os.Exit(1)
-			}
+			saveTasksOrExit(taskFile, tasks)
+
 		case ".csv":
 			tasks, err := storage.LoadCSV(*loadFile)
 			if err != nil {
 				fmt.Println("Ошибка:", err)
 				os.Exit(1)
 			}
-			err = storage.SaveJSON("tasks.json", tasks)
-			if err != nil {
-				fmt.Println("Ошибка:", err)
-				os.Exit(1)
-			}
+			saveTasksOrExit(taskFile, tasks)
 		default:
 			fmt.Println("Ошибка: неподдерживаемое расширение файла", *loadFile)
 			os.Exit(1)
 		}
 	default:
 		fmt.Println("Ошибка: неизвестная команда -", command)
-		fmt.Println(help)
+		printHelp()
+		os.Exit(1)
+	}
+}
+
+func printHelp() {
+	fmt.Println(`Доступные команды:
+  add
+  list
+  complete
+  delete
+  export
+  load`)
+}
+
+func loadTasksOrExit(path string) []todo.Task {
+	tasks, err := storage.LoadJSON(path)
+	if err != nil {
+		fmt.Println("Ошибка:", err)
+		os.Exit(1)
+	}
+	return tasks
+}
+
+func saveTasksOrExit(path string, tasks []todo.Task) {
+	if err := storage.SaveJSON(path, tasks); err != nil {
+		fmt.Println("Ошибка:", err)
 		os.Exit(1)
 	}
 }
