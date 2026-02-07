@@ -21,6 +21,14 @@ func LoadCSV(path string) ([]todo.Task, error) {
 		return nil, fmt.Errorf("ошибка чтения CSV файла: %w", err)
 	}
 
+	if len(records) == 0 {
+		return nil, fmt.Errorf("файл CSV пуст")
+	}
+
+	if len(records) == 1 {
+		return []todo.Task{}, nil
+	}
+
 	var tasks []todo.Task
 
 	for _, record := range records[1:] {
