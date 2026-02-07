@@ -1,0 +1,14 @@
+version: "1"
+
+run:
+  timeout: 5m
+
+linters:
+  disable-all: true
+  enable:
+    - errcheck       # проверка необработанных ошибок
+    - govet          # статический анализ
+    - staticcheck    # продвинутые проверки
+
+issues:
+  exclude-use-default: false

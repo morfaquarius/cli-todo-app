@@ -42,7 +42,11 @@ func main() {
 
 	switch command {
 	case "add":
-		addCmd.Parse(flags)
+		if err := addCmd.Parse(flags); err != nil {
+			fmt.Println("Ошибка парсинга аргументов:", err)
+			addCmd.Usage()
+			os.Exit(1)
+		}
 		if *desc == "" {
 			fmt.Println("Ошибка: описание не может быть пустым")
 			addCmd.Usage()
@@ -56,8 +60,11 @@ func main() {
 
 		fmt.Println("Задача успешно добавлена!")
 	case "list":
-		listCmd.Parse(flags)
-
+		if err := listCmd.Parse(flags); err != nil {
+			fmt.Println("Ошибка парсинга аргументов:", err)
+			listCmd.Usage()
+			os.Exit(1)
+		}
 		validFilters := map[string]bool{
 			"all":     true,
 			"done":    true,
@@ -95,7 +102,12 @@ func main() {
 			fmt.Printf("%-4d %-10s %s\n", task.ID, status, task.Description)
 		}
 	case "complete":
-		completeCmd.Parse(flags)
+		if err := completeCmd.Parse(flags); err != nil {
+			fmt.Println("Ошибка парсинга аргументов:", err)
+			completeCmd.Usage()
+			os.Exit(1)
+		}
+
 		if *idComplete <= 0 {
 			fmt.Println("Ошибка: ID должен быть положительным числом (1, 2, 3, ...)")
 			completeCmd.Usage()
@@ -113,7 +125,12 @@ func main() {
 
 		fmt.Printf("Задача с ID - %d помечена выполненной!\n", *idComplete)
 	case "delete":
-		deleteCmd.Parse(flags)
+		if err := deleteCmd.Parse(flags); err != nil {
+			fmt.Println("Ошибка парсинга аргументов:", err)
+			deleteCmd.Usage()
+			os.Exit(1)
+		}
+
 		if *idDelete <= 0 {
 			fmt.Println("Ошибка: ID должен быть положительным числом")
 			deleteCmd.Usage()
@@ -130,7 +147,12 @@ func main() {
 
 		fmt.Printf("Задача с ID - %d успешно удалена!\n", *idDelete)
 	case "export":
-		exportCmd.Parse(flags)
+		if err := exportCmd.Parse(flags); err != nil {
+			fmt.Println("Ошибка парсинга аргументов:", err)
+			exportCmd.Usage()
+			os.Exit(1)
+		}
+
 		validFormats := map[string]bool{
 			"csv":  true,
 			"json": true,
@@ -175,7 +197,12 @@ func main() {
 		}
 		fmt.Println("Задачи успешно экспортированы в", *outFile)
 	case "load":
-		loadCmd.Parse(flags)
+		if err := loadCmd.Parse(flags); err != nil {
+			fmt.Println("Ошибка парсинга аргументов:", err)
+			loadCmd.Usage()
+			os.Exit(1)
+		}
+
 		if *loadFile == "" {
 			fmt.Println("Ошибка: файл для импорта задач не указан")
 			loadCmd.Usage()

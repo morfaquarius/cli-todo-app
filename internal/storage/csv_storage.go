@@ -14,7 +14,11 @@ func LoadCSV(path string) ([]todo.Task, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ошибка открытия CSV файла: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		if err := file.Close(); err != nil {
+			fmt.Printf("Ошибка закрытия файла: %v\n", err)
+		}
+	}()
 	reader := csv.NewReader(file)
 	records, err := reader.ReadAll()
 	if err != nil {
@@ -59,15 +63,23 @@ func SaveCSV(path string, tasks []todo.Task) error {
 	if err != nil {
 		return fmt.Errorf("ошибка при создании файла: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		if err := file.Close(); err != nil {
+			fmt.Printf("Ошибка закрытия файла: %v\n", err)
+		}
+	}()
 	writer := csv.NewWriter(file)
-	writer.Write([]string{"ID", "Description", "Done"})
+	if err := writer.Write([]string{"ID", "Description", "Done"}); err != nil {
+		return fmt.Errorf("ошибка записи заголовка CSV: %w", err)
+	}
 	for _, task := range tasks {
-		writer.Write([]string{
+		if err := writer.Write([]string{
 			strconv.Itoa(task.ID),
 			task.Description,
 			strconv.FormatBool(task.Done),
-		})
+		}); err != nil {
+			return fmt.Errorf("ошибка записи строки CSV: %w", err)
+		}
 	}
 	writer.Flush()
 	if err := writer.Error(); err != nil {

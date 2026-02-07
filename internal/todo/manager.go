@@ -19,7 +19,7 @@ func Add(tasks []Task, desc string) []Task {
 	return tasks
 }
 
-//List возвращает отфильтрованный срез по заданному параметру
+// List возвращает отфильтрованный срез по заданному параметру
 func List(tasks []Task, filter string) []Task {
 	switch filter {
 	case "all":
